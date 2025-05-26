@@ -1,54 +1,60 @@
-using Unity.VisualScripting;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 [RequireComponent (typeof(Rigidbody2D))]
 public class Movement : MonoBehaviour
 {
-    public GameObject[] _shootPoint;
-
-    public GameObject bullet;
-
    [SerializeField] float movespeed = 1f;
 
+    public GameObject UI;
     Rigidbody2D _rb;
+    Vector2 MoveDirection;
 
-    float shoottime = 1f;
-    [SerializeField]
-    float delaytime = 1f;
+    public bool IsDead = false;
 
+    public Shooting weapon;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+       
+        UI.SetActive (false);
         _rb = GetComponent<Rigidbody2D>();
     }
     // Update is called once per frame
     void Update()
     {
-       
-            BulletShoot();
-        
-        Debug.Log(shoottime + "and " + delaytime);
-        PlayerInput();
+        if(!IsDead) 
+        {
+            float moveX = Input.GetAxisRaw("Horizontal");
+            float moveY = Input.GetAxisRaw("Vertical");
+
+            MoveDirection = new Vector2(moveX, moveY).normalized;
+            if (Input.GetMouseButtonDown(0))
+            {
+                FindObjectOfType<AudioManeger>().Play("Shoot");
+                weapon.Fire();
+            }
+        }
+
+        if(IsDead)
+        {
+            UI.SetActive(true);
+            _rb.velocity = new Vector2(transform.position.x, transform.position.y);
+        }
+    }
+    private void FixedUpdate()
+    {
+        if (!IsDead)
+        {
+            _rb.velocity = new Vector2(MoveDirection.x * movespeed, MoveDirection.y * movespeed);
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.CompareTag("EnemyBullet"))
+        {
+            IsDead = true;
+        }
     }
 
-    void BulletShoot()
-    {
-        foreach (var shootpoint in _shootPoint)
-        {
-                Instantiate(bullet, shootpoint.transform.position, Quaternion.identity);           
-        }
-    }
-
-    void PlayerInput()
-    {
-        if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow))
-        {
-            _rb.position = new Vector2(transform.position.x + - movespeed, transform.position.y);
-        }
-        if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow))
-        {
-            _rb.position = new Vector2(transform.position.x + movespeed, transform.position.y);
-        }
-    }
 }//class

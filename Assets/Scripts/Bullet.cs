@@ -2,21 +2,15 @@ using UnityEngine;
 [RequireComponent (typeof(Rigidbody2D))]
 public class Bullet : MonoBehaviour
 {
-    Rigidbody2D _rb;
-    public float speed = 2f;
-
-    
-
-    void Start()
+    private void Start()
     {
-        _rb = GetComponent<Rigidbody2D>();
-       // transform.position = Vector2.up * speed * Time.deltaTime;
-
-        Destroy(gameObject, 3f);
+        Destroy(gameObject, 5f);
     }
-    private void Update()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        _rb.position = new Vector2(transform.position.x, transform.position.y + speed * Time.deltaTime);
-        //transform.position = Vector2.up * speed * Time.deltaTime;
+        if (collision.CompareTag("Enemy"))
+        { 
+            Destroy(gameObject);
+        }
     }
 }
